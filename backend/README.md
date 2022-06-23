@@ -35,7 +35,7 @@ Populate the database using the `trivia.psql` file provided. From the `backend` 
 ```bash
 psql trivia < trivia.psql
 ```
-
+`
 ### Run the Server
 
 From within the `./src` directory first ensure you are working using your created virtual environment.
