@@ -48,6 +48,8 @@ By making notes ahead of time, you will practice the core skill of being able to
 
 > View the [Frontend README](./frontend/README.md) for more details.
 
+API DOCUMENTATION
+
 GET '/categories'
 
 Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
