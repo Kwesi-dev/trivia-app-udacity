@@ -10,7 +10,6 @@ def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
-
     questions = [question.format() for question in selection]
     current_questions = questions[start:end]
 
@@ -43,15 +42,12 @@ def create_app(test_config=None):
     """
     @app.route("/categories")
     def get_categories():
-        categories = Category.query.all()
-
-        if len(categories == 0):
-            abort(404)
-
         categoriesBody = {}
+        categories = Category.query.all()
+        if len(categories) == 0:
+            abort(404)
         for category in categories:
             categoriesBody[category.id] = category.type
-
         return jsonify({
             'success': True,
             'categories': categoriesBody
@@ -74,10 +70,8 @@ def create_app(test_config=None):
         selection = Question.query.all()
         current_questions = paginate_questions(request, selection)
         categories = Category.query.all()
-
         if len(current_questions) == 0:
             abort(404)
-
         return jsonify({
             'success': True,
             'questions': current_questions,
@@ -118,10 +112,10 @@ def create_app(test_config=None):
     def add_question():
         try:
             body = request.get_json()
-            new_question = body.get('question', None)
-            new_answer = body.get('answer', None)
-            new_category = body.get('category', None)
-            new_difficulty = body.get('difficulty', None)
+            new_question = body.get('question')
+            new_answer = body.get('answer')
+            new_category = body.get('category')
+            new_difficulty = body.get('difficulty')
 
             question = Question(question=new_question, answer=new_answer,category=new_category, difficulty=new_difficulty)
             question.insert()
@@ -256,4 +250,3 @@ def create_app(test_config=None):
             "message": "bad request"
         }), 400
     return app
-
