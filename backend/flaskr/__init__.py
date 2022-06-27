@@ -12,7 +12,6 @@ def paginate_questions(request, selection):
     end = start + QUESTIONS_PER_PAGE
     questions = [question.format() for question in selection]
     current_questions = questions[start:end]
-
     return current_questions
     
 
@@ -145,7 +144,7 @@ def create_app(test_config=None):
     @app.route('/questions/search', methods=['POST'])
     def search_questions():
         question_body = request.get_json()
-        searchTerm = question_body.get('searchTerm', None)
+        searchTerm = question_body.get('searchTerm')
 
         if searchTerm:
             results = Question.query.filter(
@@ -190,27 +189,31 @@ def create_app(test_config=None):
     and shown whether they were correct or not.
     """
     @app.route('/quizzes', methods=['POST'])
-    def play_game():
+    def play_quiz_game():
         try:
-            quiz_body = request.get_json()
-            if not ('quiz_category' in quiz_body  and 'previous_questions' in quiz_body ):
-                abort(422)
-            quiz_category = quiz_body.get('quiz_category')
-            previous_questions = quiz_body .get('previous_questions')
-            if quiz_category['type'] == 'click':
-                quiz_questions = Question.query.filter(
-                    Question.id.notin_((previous_questions))).all()
-            else:
-                available_questions = Question.query.filter_by(
-                    category=quiz_category['id']).filter(Question.id.notin_((previous_questions))).all()
-
-            new_quiz_question = available_questions[random.randrange(
-                0, len(available_questions))].format() if len(available_questions) > 0 else None
-
+           previous_question = request.get_json().get("previous_questions")
+           quiz_category = request.get_json().get("quiz_category")
+           if (quiz_category['id'] == 0):
+            questions_query = Question.query.all()
+           else:
+            questions_query = Question.query.filter_by(category=quiz_category['id']).all()
+           random_index = random.randint(0, len(questions_query)-1)
+           next_question = questions_query[random_index]
+           while next_question.id not in previous_question:
+            next_question = questions_query[random_index]
             return jsonify({
                 'success': True,
-                'question': new_quiz_question
+                'question': {
+                    "id": next_question.id,
+                    "question": next_question.question,
+                    "answer": next_question.answer,
+                    "category": next_question.category,
+                    "difficulty": next_question.difficulty,
+                },
+                'previousQuestion': previous_question
             })
+
+
         except:
             abort(422)
     """
