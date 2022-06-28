@@ -116,6 +116,9 @@ def create_app(test_config=None):
             new_category = body.get('category')
             new_difficulty = body.get('difficulty')
 
+            if len(new_question) == 0:
+                abort(422)
+            
             question = Question(question=new_question, answer=new_answer,category=new_category, difficulty=new_difficulty)
             question.insert()
             selection = Question.query.order_by(Question.id).all()
@@ -197,23 +200,13 @@ def create_app(test_config=None):
             questions_query = Question.query.all()
            else:
             questions_query = Question.query.filter_by(category=quiz_category['id']).all()
-           random_index = random.randint(0, len(questions_query)-1)
-           next_question = questions_query[random_index]
-           while next_question.id not in previous_question:
-            next_question = questions_query[random_index]
-            return jsonify({
+           next_question = questions_query[random.randrange(
+                0, len(questions_query))].format() if len(questions_query) > 0 else None
+
+           return jsonify({
                 'success': True,
-                'question': {
-                    "id": next_question.id,
-                    "question": next_question.question,
-                    "answer": next_question.answer,
-                    "category": next_question.category,
-                    "difficulty": next_question.difficulty,
-                },
-                'previousQuestion': previous_question
-            })
-
-
+                'question': next_question
+           })
         except:
             abort(422)
     """
